@@ -1,10 +1,6 @@
-"""# 2.Visualize
-
-以下に画像を表示できるようにするためのコードを載せる（すべてコピペ）
-"""
-
 import IPython
 import os
+import sys
 import json
 import random
 import numpy as np
@@ -14,6 +10,8 @@ from math import trunc
 from PIL import Image as PILImage
 from PIL import ImageDraw as PILImageDraw
 import base64
+import imgkit
+
 
 
 # Load the dataset json
@@ -31,7 +29,6 @@ class CocoDataset():
         json_file.close()
 
         self.process_info()
-        self.process_licenses()
         self.process_categories()
         self.process_images()
         self.process_segmentations()
@@ -44,11 +41,9 @@ class CocoDataset():
             print('  {}: {}'.format(key, item))
 
         requirements = [['description', str],
-                        ['url', str],
-                        ['version', str],
-                        ['year', int],
+                        ['year', str],
                         ['contributor', str],
-                        ['date_created', str]]
+                        ['data_created', str]]
         for req, req_type in requirements:
             if req not in self.info:
                 print('ERROR: {} is missing'.format(req))
@@ -56,24 +51,6 @@ class CocoDataset():
                 print('ERROR: {} should be type {}'.format(req, str(req_type)))
         print('')
 
-
-    def display_licenses(self):
-        print('Licenses:')
-        print('=========')
-
-        requirements = [['id', int],
-                        ['url', str],
-                        ['name', str]]
-        for license in self.licenses:
-            for key, item in license.items():
-                print('  {}: {}'.format(key, item))
-            for req, req_type in requirements:
-                if req not in license:
-                    print('ERROR: {} is missing'.format(req))
-                elif type(license[req]) != req_type:
-                    print('ERROR: {} should be type {}'.format(req, str(req_type)))
-            print('')
-        print('')
 
     def display_categories(self):
         print('Categories:')
@@ -85,15 +62,16 @@ class CocoDataset():
             print('')
 
     def display_image(self, image_id, show_polys=True, show_bbox=True, show_crowds=True, use_url=False):
-        print('Image:')
-        print('======')
+        #print('Image:')
+        #print('======')
         if image_id == 'random':
             image_id = random.choice(list(self.images.keys()))
 
         # Print the image info
         image = self.images[image_id]
-        for key, val in image.items():
-            print('  {}: {}'.format(key, val))
+        
+        #for key, val in image.items():
+            #print('  {}: {}'.format(key, val))
 
         # Open the image
         if use_url:
@@ -118,7 +96,7 @@ class CocoDataset():
         bbox_polygons = {}
         rle_regions = {}
         poly_colors = {}
-        print('  segmentations ({}):'.format(len(self.segmentations[image_id])))
+        #print('  segmentations ({}):'.format(len(self.segmentations[image_id])))
         for i, segm in enumerate(self.segmentations[image_id]):
             polygons_list = []
             if segm['iscrowd'] != 0:
@@ -176,7 +154,7 @@ class CocoDataset():
             bbox_polygons[segm['id']] = str(bbox_points).lstrip('[').rstrip(']')
 
             # Print details
-            print('    {}:{}:{}'.format(segm['id'], poly_colors[segm['id']], self.categories[segm['category_id']]))
+            #print('    {}:{}:{}'.format(segm['id'], poly_colors[segm['id']], self.categories[segm['category_id']]))
 
         # tif to png
         image.convert(mode="I")
@@ -205,7 +183,8 @@ class CocoDataset():
                 for rect_def in rect_list:
                     x, y = rect_def['x'], rect_def['y']
                     w, h = rect_def['width'], rect_def['height']
-                    html += '<rect x="{}" y="{}" width="{}" height="{}" style="fill:{}; stroke:{}; stroke-width:1; fill-opacity:0.5; stroke-opacity:0.5" />'.format(x, y, w, h, fill_color, stroke_color)
+                    html += '<rect x="{}" y="{}" width="{}" height="{}" style="fill:{}; stroke:{}; stroke-width:1; fill-opacity:0.5; stroke-opacity:0.5" />' \
+                    .format(x, y, w, h, fill_color, stroke_color)
 
         if show_bbox:
             for seg_id, points in bbox_polygons.items():
@@ -222,9 +201,6 @@ class CocoDataset():
 
     def process_info(self):
         self.info = self.coco['info']
-
-    def process_licenses(self):
-        self.licenses = self.coco['licenses']
 
     def process_categories(self):
         self.categories = {}
@@ -263,17 +239,36 @@ class CocoDataset():
                 self.segmentations[image_id] = []
             self.segmentations[image_id].append(segmentation)
 
-#ヘッダの表示
-annotation_path = '/home/shuichi/research/datasets_train.json'
-image_dir = '/home/shuichi/research/Mask_RCNN-master/filament/train_jpg'
 
-coco_dataset = CocoDataset(annotation_path, image_dir)
-#coco_dataset.display_info()
-#coco_dataset.display_licenses()
-coco_dataset.display_categories()
+def main():
+    args = sys.argv
 
-image_ids
+    annotation_path = os.path.abspath('./'+ sys.argv[1])
+    image_dir       = os.path.abspath('./'+ sys.argv[2])
+    image_id        = sys.argv[3]
+    outimagedir     = os.path.abspath('./plotted_image')
+    htmldir         = os.path.abspath('./html')
 
-#画像IDを指定して表示
-html = coco_dataset.display_image("20120627170733")
-IPython.display.HTML(html)
+    coco_dataset = CocoDataset(annotation_path, image_dir)
+    #coco_dataset.display_info()
+    #coco_dataset.display_categories()
+
+    html = coco_dataset.display_image(image_id)
+
+    htmlfilepath = htmldir     + '/' + image_id + '.html'
+    outimagepath = outimagedir + '/' + image_id + '.jpg'
+
+    print(htmlfilepath)
+    print(outimagepath)
+
+    with open(htmlfilepath,'w') as f:
+        f.write(html)
+
+    with open(htmlfilepath) as f:
+        imgkit.from_file(f, outimagepath)
+
+
+    #IPython.display.HTML(html)
+    
+if __name__=='__main__':
+    main()

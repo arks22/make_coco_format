@@ -61,8 +61,6 @@ def images():
         tmp["width"] = 2048
         tmp["height"] = 2048
         tmp["date_captured"] = year + "-" + month + "-" + day +" " + hour + ":" + minute + ":" + second
-        #tmp["coco_url"] = dummy_words
-        #tmp["flickr_url"] = dummy_words
         tmps.append(tmp)
     return tmps
 
