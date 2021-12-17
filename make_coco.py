@@ -212,12 +212,3 @@ def main():
     
 if __name__=='__main__':
     main()
-
-
-"""
-#なんかannotationのファイル必要ぽかったので作ってみる
-js = cl.OrderedDict()
-js["annotations"] = annotations()
-fw = open('annotations_train.json','w')
-json.dump(js,fw)
-"""
