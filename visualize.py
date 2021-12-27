@@ -1,3 +1,7 @@
+"""
+$ python3  visualize.py datasets_yyyy.json <img_id>
+"""
+
 import IPython
 import os
 import sys
@@ -162,8 +166,7 @@ class CocoDataset():
         image = PILImage.open("./tmp.png")
         with open("tmp.png", 'rb') as f:
             data = f.read()
-            # base64
-            b64=base64.b64encode(data)            
+            b64=base64.b64encode(data)# base64
         img_b64 = "data:image/png;base64,"+ b64.decode('utf-8') # binary to string
         html  = '<div class="container" style="position:relative;">'
         html += '<img src="{}" style="position:relative;top:0px;left:0px;width:{}px;">'.format(img_b64, adjusted_width)
@@ -197,6 +200,8 @@ class CocoDataset():
         html += '<style>'
         html += '.svgclass { position:absolute; top:0px; left:0px;}'
         html += '</style>'
+
+        os.remove('./tmp.png')
         return html
 
     def process_info(self):
@@ -247,7 +252,6 @@ def main():
     image_dir       = os.path.abspath('./'+ sys.argv[2])
     image_id        = sys.argv[3]
     outimagedir     = os.path.abspath('./plotted_image')
-    htmldir         = os.path.abspath('./html')
 
     coco_dataset = CocoDataset(annotation_path, image_dir)
     #coco_dataset.display_info()
@@ -255,20 +259,16 @@ def main():
 
     html = coco_dataset.display_image(image_id)
 
-    htmlfilepath = htmldir     + '/' + image_id + '.html'
     outimagepath = outimagedir + '/' + image_id + '.jpg'
 
-    print(htmlfilepath)
-    print(outimagepath)
+    options = {
+        'zoom': 4, 
+        'width': 1024*4, 
+        'height': 616*4,
+        'quality': 100
+    }
 
-    with open(htmlfilepath,'w') as f:
-        f.write(html)
+    imgkit.from_string(html, outimagepath, options=options)
 
-    with open(htmlfilepath) as f:
-        imgkit.from_file(f, outimagepath)
-
-
-    #IPython.display.HTML(html)
-    
 if __name__=='__main__':
     main()
