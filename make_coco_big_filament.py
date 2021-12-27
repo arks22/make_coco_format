@@ -95,7 +95,7 @@ def annotations():
             tmp = cl.OrderedDict()
             polygon = Polygon(polygon)
 
-            if not((poly_x == []) or (poly_y == [])):
+            if not ((poly_x == []) or (poly_y == [])) and not polygon.area<600:
                 tmp_segmentation = cl.OrderedDict()
                 tmp["segmentation"] = [segmentation]
                 tmp["id"] = str(10**6*int(YEAR) + 10**3*i + j)
@@ -203,7 +203,7 @@ def main():
     js["annotations"] = annotations()
     js["categories"]  = categories()
 
-    jsonfilename = 'datasets_' + YEAR + '.json'
+    jsonfilename = 'datasets_' + YEAR + '_bigfil.json'
     fw = open(jsonfilename,'w')
     json.dump(js,fw)
     print(jsonfilename + ' was created')

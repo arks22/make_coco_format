@@ -1,5 +1,5 @@
 """
-$ python3  visualize.py datasets_yyyy.json <img_id>
+$ python3  visualize.py datasets_yyyy.json jpg_yyyy <img_id>
 """
 
 import IPython
@@ -259,7 +259,7 @@ def main():
 
     html = coco_dataset.display_image(image_id)
 
-    outimagepath = outimagedir + '/' + image_id + '.jpg'
+    outimagepath = outimagedir + '/' + image_id + '_bigfil.jpg'
 
     options = {
         'zoom': 4, 
